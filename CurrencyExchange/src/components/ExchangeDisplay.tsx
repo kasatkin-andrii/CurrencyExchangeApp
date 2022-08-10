@@ -1,13 +1,30 @@
 import {StyleSheet, Text, TextInput, TouchableOpacity, View} from 'react-native'
-import React from 'react'
+import React, {useContext, useEffect, useState} from 'react'
 import RefreshIcon from 'react-native-vector-icons/SimpleLineIcons'
 import {colors} from '../constants'
+import {ThemeContext} from '../context/ThemeContext'
+import {ConvertCurrency} from '../api'
+import {AppContext} from '../context/AppContext'
 
-interface ExchangeDisplayProps {
-  darkMode: boolean
-}
+const ExchangeDisplay = () => {
+  const {darkMode} = useContext(ThemeContext)
+  const {fromCurrency, toCurrency, amount, setCount} = useContext(AppContext)
+  const [convertedValue, setConvertedValue] = useState('')
 
-const ExchangeDisplay = ({darkMode}: ExchangeDisplayProps) => {
+  useEffect(() => {
+    displayConvertedCurrency()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [amount, fromCurrency, toCurrency])
+
+  const displayConvertedCurrency = async () => {
+    try {
+      const converted = await ConvertCurrency(fromCurrency, toCurrency, amount)
+      converted ? setConvertedValue(converted.toString()) : null
+    } catch (error) {
+      console.log(error)
+    }
+  }
+
   const styles = StyleSheet.create({
     exchangeDisplay: {
       flex: 1,
@@ -81,13 +98,17 @@ const ExchangeDisplay = ({darkMode}: ExchangeDisplayProps) => {
     <View style={styles.exchangeDisplay}>
       <Text style={styles.text}>Amount</Text>
       <View style={styles.inputContainer}>
-        <Text style={styles.inputTitle}>USD</Text>
+        <Text style={styles.inputTitle}>{fromCurrency}</Text>
         <TextInput
-          placeholder="100"
           placeholderTextColor={darkMode ? colors.white : colors.black}
           style={styles.input}
+          value={amount.toString()}
+          onChangeText={text => setCount(Number(text))}
+          keyboardType="number-pad"
         />
-        <TouchableOpacity style={styles.changeBtn}>
+        <TouchableOpacity
+          style={styles.changeBtn}
+          onPress={() => displayConvertedCurrency()}>
           <RefreshIcon
             name="refresh"
             size={20}
@@ -95,8 +116,12 @@ const ExchangeDisplay = ({darkMode}: ExchangeDisplayProps) => {
           />
         </TouchableOpacity>
       </View>
-      <Text style={styles.mainCurrencyText}>100 USD=</Text>
-      <Text style={styles.resultCurrencyText}>9.14 Euro</Text>
+      <Text style={styles.mainCurrencyText}>
+        {amount} {fromCurrency}=
+      </Text>
+      <Text style={styles.resultCurrencyText}>
+        {convertedValue} {toCurrency}
+      </Text>
     </View>
   )
 }

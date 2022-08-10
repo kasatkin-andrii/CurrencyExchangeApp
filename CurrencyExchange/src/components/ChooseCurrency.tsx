@@ -1,13 +1,35 @@
-import {StyleSheet, Text, View} from 'react-native'
-import React from 'react'
+import {Modal, StyleSheet, Text, TouchableOpacity, View} from 'react-native'
+import React, {useContext, useEffect, useState} from 'react'
 import Icon from 'react-native-vector-icons/MaterialIcons'
 import {colors} from '../constants'
+import ModalPicker from './ModalPicker'
+import {ThemeContext} from '../context/ThemeContext'
+import {AppContext} from '../context/AppContext'
 
 interface ChooseCurrencyProps {
-  darkMode: boolean
+  defaultCurrency: string
+  type?: string
 }
 
-const ChooseCurrency = ({darkMode}: ChooseCurrencyProps) => {
+const ChooseCurrency = ({
+  defaultCurrency,
+  type = 'to',
+}: ChooseCurrencyProps) => {
+  const {darkMode} = useContext(ThemeContext)
+  const {currencyList, setFromCurr, setToCurr} = useContext(AppContext)
+
+  const list = currencyList?.map(({currency_code}) => currency_code)
+  const defaultValue = list?.find(item => item === defaultCurrency)
+  const [isModalVisible, setIsModalVisible] = useState(false)
+  const [value, setValue] = useState(defaultValue ? defaultValue : '')
+
+  useEffect(() => {
+    type === 'from' ? setFromCurr(value) : setToCurr(value)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [value])
+
+  const changeModalVisibility = (bool: boolean) => setIsModalVisible(bool)
+
   const styles = StyleSheet.create({
     container: {
       backgroundColor: darkMode ? colors.darkGray : colors.white,
@@ -22,7 +44,6 @@ const ChooseCurrency = ({darkMode}: ChooseCurrencyProps) => {
         width: 10,
       },
       elevation: 5,
-      flexDirection: 'row',
     },
     text: {
       color: darkMode ? colors.white : colors.black,
@@ -38,14 +59,30 @@ const ChooseCurrency = ({darkMode}: ChooseCurrencyProps) => {
   })
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.text}>USD</Text>
-      <Icon
-        name="keyboard-arrow-down"
-        size={22}
-        color={darkMode ? colors.white : colors.black}
-        style={styles.iconArrow}
-      />
+    <View>
+      <TouchableOpacity
+        style={styles.container}
+        onPress={() => changeModalVisibility(true)}>
+        <Text style={styles.text}>{value}</Text>
+        <Icon
+          name="keyboard-arrow-down"
+          size={22}
+          color={darkMode ? colors.white : colors.black}
+          style={styles.iconArrow}
+        />
+      </TouchableOpacity>
+      <Modal
+        transparent={true}
+        animationType={'fade'}
+        visible={isModalVisible}
+        onRequestClose={() => changeModalVisibility(false)}>
+        <ModalPicker
+          changeModalVisibility={changeModalVisibility}
+          data={list}
+          currentValue={value}
+          setValue={setValue}
+        />
+      </Modal>
     </View>
   )
 }

@@ -1,14 +1,16 @@
 import {StyleSheet, Text, View} from 'react-native'
-import React from 'react'
+import React, {useContext} from 'react'
 import {colors} from '../constants'
+import {ThemeContext} from '../context/ThemeContext'
 
 interface CurrencyItemProps {
-  darkMode: boolean
-  title: string
-  abbreviation: string
+  currency_name: string
+  currency_code: string
 }
 
-const CurrencyItem = ({darkMode, title, abbreviation}: CurrencyItemProps) => {
+const CurrencyItem = ({currency_name, currency_code}: CurrencyItemProps) => {
+  const {darkMode} = useContext(ThemeContext)
+
   const styles = StyleSheet.create({
     itemContainer: {
       flexDirection: 'row',
@@ -24,23 +26,42 @@ const CurrencyItem = ({darkMode, title, abbreviation}: CurrencyItemProps) => {
       width: '100%',
       alignItems: 'center',
       justifyContent: 'space-around',
+      marginBottom: 15,
     },
     itemText: {
       color: darkMode ? colors.white : colors.black,
-      fontSize: 18,
+      fontSize: 16,
       fontWeight: '400',
     },
     itemAbbreviation: {
       color: darkMode ? colors.white : colors.black,
-      fontSize: 20,
+      fontSize: 18,
       fontWeight: '700',
+    },
+    titleContainer: {
+      flex: 10,
+      height: '100%',
+      alignItems: 'flex-start',
+      justifyContent: 'center',
+      paddingLeft: 25,
+    },
+    abbreviationContainer: {
+      flex: 2,
+      height: '100%',
+      alignItems: 'center',
+      justifyContent: 'center',
+      marginRight: 10,
     },
   })
 
   return (
     <View style={styles.itemContainer}>
-      <Text style={styles.itemText}>{title}</Text>
-      <Text style={styles.itemAbbreviation}>{abbreviation}</Text>
+      <View style={styles.titleContainer}>
+        <Text style={styles.itemText}>{currency_name}</Text>
+      </View>
+      <View style={styles.abbreviationContainer}>
+        <Text style={styles.itemAbbreviation}>{currency_code}</Text>
+      </View>
     </View>
   )
 }
