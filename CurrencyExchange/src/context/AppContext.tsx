@@ -1,4 +1,10 @@
-import React, {createContext, useState} from 'react'
+import {
+  STORED_AMOUNT_KEY,
+  STORED_FROM_CURRENCY_KEY,
+  STORED_TO_CURRENCY_KEY,
+} from '@env'
+import AsyncStorage from '@react-native-async-storage/async-storage'
+import React, {createContext, useEffect, useState} from 'react'
 import {LoadCurrencyList} from '../api'
 
 interface AppContextProviderProps {
@@ -28,15 +34,83 @@ export const AppContextProvider = ({children}: AppContextProviderProps) => {
   const [currencyList, setCurrencyList] = useState<CurrencyListProps[] | null>(
     null,
   )
-  const [fromCurrency, setFromCurrency] = useState<string>('EUR')
-  const [toCurrency, setToCurrency] = useState<string>('UAH')
-  const [amount, setAmount] = useState(10)
+  const [fromCurrency, setFromCurrency] = useState<string>('')
+  const [toCurrency, setToCurrency] = useState<string>('')
+  const [amount, setAmount] = useState(0)
 
-  const setFromCurr = (curr: string) => setFromCurrency(() => curr)
+  useEffect(() => {
+    setupFromCurrency()
+    setupToCurrency()
+    setupAmount()
+  }, [])
 
-  const setToCurr = (curr: string) => setToCurrency(() => curr)
+  const setFromCurr = (curr: string) => {
+    setFromCurrency(() => curr)
+    storeFromCurrency(curr)
+  }
 
-  const setCount = (count: number) => setAmount(() => count)
+  const setToCurr = (curr: string) => {
+    setToCurrency(() => curr)
+    storeToCurrency(curr)
+  }
+
+  const setCount = (count: number) => {
+    setAmount(() => count)
+    storeAmount(count)
+  }
+
+  const storeFromCurrency = async (value: string) => {
+    try {
+      await AsyncStorage.setItem(STORED_FROM_CURRENCY_KEY, value)
+    } catch (error) {
+      console.log(error)
+    }
+  }
+
+  const setupFromCurrency = async () => {
+    try {
+      const value = await AsyncStorage.getItem(STORED_FROM_CURRENCY_KEY)
+      value !== null
+        ? setFromCurrency(() => value)
+        : setFromCurrency(() => 'EUR')
+    } catch (error) {
+      console.log(error)
+    }
+  }
+
+  const storeToCurrency = async (value: string) => {
+    try {
+      await AsyncStorage.setItem(STORED_TO_CURRENCY_KEY, value)
+    } catch (error) {
+      console.log(error)
+    }
+  }
+
+  const setupToCurrency = async () => {
+    try {
+      const value = await AsyncStorage.getItem(STORED_TO_CURRENCY_KEY)
+      value !== null ? setToCurrency(() => value) : setToCurrency(() => 'UAH')
+    } catch (error) {
+      console.log(error)
+    }
+  }
+
+  const storeAmount = async (value: number) => {
+    try {
+      await AsyncStorage.setItem(STORED_AMOUNT_KEY, JSON.stringify(value))
+    } catch (error) {
+      console.log(error)
+    }
+  }
+
+  const setupAmount = async () => {
+    try {
+      const value = await AsyncStorage.getItem(STORED_AMOUNT_KEY)
+      value !== null ? setAmount(() => JSON.parse(value)) : setAmount(() => 10)
+    } catch (error) {
+      console.log(error)
+    }
+  }
 
   const switchCurrency = () => {
     const tempCurrency = fromCurrency
