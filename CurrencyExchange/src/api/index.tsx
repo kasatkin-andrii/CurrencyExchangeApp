@@ -1,10 +1,17 @@
 import axios from 'axios'
+import {
+  CURRENCY_API_KEY,
+  LOAD_CURRENCY_URL,
+  LOAD_CURRENCY_API_HOST,
+  CONVERT_CURRENCY_URL,
+  CONVERT_CURRENCY_API_HOST,
+} from '@env'
 
 export const LoadCurrencyList = async () => {
   try {
-    const URL = 'https://currencyscoop.p.rapidapi.com/currencies'
-    const API_KEY = 'fe49b8756cmsh1316d21f559d7f7p1e6fe0jsn27d07f15e99c'
-    const API_HOST = 'currencyscoop.p.rapidapi.com'
+    const URL = LOAD_CURRENCY_URL
+    const API_KEY = CURRENCY_API_KEY
+    const API_HOST = LOAD_CURRENCY_API_HOST
 
     const options = {
       method: 'GET',
@@ -31,10 +38,9 @@ export const ConvertCurrency = async (
   count: number,
 ): Promise<number | undefined> => {
   try {
-    const URL =
-      'https://currency-converter-by-api-ninjas.p.rapidapi.com/v1/convertcurrency'
-    const API_KEY = 'fe49b8756cmsh1316d21f559d7f7p1e6fe0jsn27d07f15e99c'
-    const API_HOST = 'currency-converter-by-api-ninjas.p.rapidapi.com'
+    const URL = CONVERT_CURRENCY_URL
+    const API_KEY = CURRENCY_API_KEY
+    const API_HOST = CONVERT_CURRENCY_API_HOST
 
     const options = {
       method: 'GET',
