@@ -28,7 +28,7 @@ const ChooseCurrency = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [value])
 
-  const changeModalVisibility = (bool: boolean) => setIsModalVisible(bool)
+  const changeModalVisibility = (bool: boolean) => setIsModalVisible(() => bool)
 
   const styles = StyleSheet.create({
     container: {

@@ -32,7 +32,7 @@ const ModalPicker = ({
   const initialScrollIndex = data?.indexOf(currentValue)
 
   const onPressItem = (option: string) => {
-    setValue(option)
+    setValue(() => option)
     changeModalVisibility(false)
   }
 

@@ -32,16 +32,16 @@ export const AppContextProvider = ({children}: AppContextProviderProps) => {
   const [toCurrency, setToCurrency] = useState<string>('UAH')
   const [amount, setAmount] = useState(10)
 
-  const setFromCurr = (curr: string) => setFromCurrency(curr)
+  const setFromCurr = (curr: string) => setFromCurrency(() => curr)
 
-  const setToCurr = (curr: string) => setToCurrency(curr)
+  const setToCurr = (curr: string) => setToCurrency(() => curr)
 
-  const setCount = (count: number) => setAmount(count)
+  const setCount = (count: number) => setAmount(() => count)
 
   const switchCurrency = () => {
     const tempCurrency = fromCurrency
-    setFromCurrency(toCurrency)
-    setToCurrency(tempCurrency)
+    setFromCurrency(() => toCurrency)
+    setToCurrency(() => tempCurrency)
   }
 
   const setupCurrencyList = async () => {
@@ -53,7 +53,8 @@ export const AppContextProvider = ({children}: AppContextProviderProps) => {
         currency_code: currencies[key].currency_code,
       }))
 
-      setCurrencyList(list)
+      setCurrencyList(() => list)
+      return list
     } catch (error) {
       console.log(error)
     }

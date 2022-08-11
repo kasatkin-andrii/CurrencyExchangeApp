@@ -1,10 +1,11 @@
-import React, {useContext, useEffect} from 'react'
+import React, {useContext, useEffect, useState} from 'react'
 import {
   ActivityIndicator,
   FlatList,
   SafeAreaView,
   StyleSheet,
   Text,
+  TextInput,
   TouchableOpacity,
   View,
 } from 'react-native'
@@ -15,7 +16,7 @@ import ChooseCurrency from '../components/ChooseCurrency'
 import ExchangeDisplay from '../components/ExchangeDisplay'
 import CurrencyItem from '../components/CurrencyItem'
 import {ThemeContext} from '../context/ThemeContext'
-import {AppContext} from '../context/AppContext'
+import {AppContext, CurrencyListProps} from '../context/AppContext'
 
 const APP_NAME = 'Currency Exchange'
 
@@ -29,10 +30,43 @@ const HomeScreen = () => {
     toCurrency,
   } = useContext(AppContext)
 
+  const [searchValue, setSearchValue] = useState('')
+  const [filteredData, setFilteredData] = useState<CurrencyListProps[] | null>(
+    null,
+  )
+
   useEffect(() => {
-    setupCurrencyList()
+    init()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
+
+  const init = async () => {
+    const list = await setupCurrencyList()
+    //@ts-ignore
+    setFilteredData(() => list, searchFilter(searchValue))
+  }
+
+  const searchFilter = (text: string) => {
+    if (text) {
+      const newData = currencyList?.filter(item => {
+        const codeData = item.currency_code
+          ? item.currency_code.toUpperCase()
+          : ''.toUpperCase()
+        const nameData = item.currency_name
+          ? item.currency_name.toUpperCase()
+          : ''.toUpperCase()
+        const textData = text.toUpperCase()
+        return (
+          codeData.indexOf(textData) > -1 || nameData.indexOf(textData) > -1
+        )
+      })
+      newData && setFilteredData(() => newData)
+      setSearchValue(() => text)
+    } else {
+      setFilteredData(() => currencyList)
+      setSearchValue(() => text)
+    }
+  }
 
   const styles = StyleSheet.create({
     root: {
@@ -70,6 +104,30 @@ const HomeScreen = () => {
       flex: 5,
       paddingHorizontal: 20,
       paddingVertical: 20,
+    },
+    searchContainer: {
+      backgroundColor: darkMode ? colors.lightGray : colors.white,
+      marginBottom: 10,
+      borderRadius: 20,
+      flexDirection: 'row',
+      alignItems: 'center',
+      paddingHorizontal: 15,
+      shadowColor: darkMode ? colors.lightGray : colors.black,
+      shadowOffset: {
+        height: 10,
+        width: 10,
+      },
+      elevation: 5,
+    },
+    searchIcon: {
+      marginRight: 5,
+    },
+    searchInput: {
+      color: darkMode ? colors.white : colors.black,
+      flex: 1,
+      fontSize: 16,
+      fontWeight: '400',
+      fontStyle: 'italic',
     },
   })
   return (
@@ -109,14 +167,29 @@ const HomeScreen = () => {
         <ExchangeDisplay />
       </View>
       <View style={styles.listCurrency}>
-        {currencyList === null ? (
+        <View style={styles.searchContainer}>
+          <Icon
+            name="search"
+            size={24}
+            color={darkMode ? colors.white : colors.black}
+            style={styles.searchIcon}
+          />
+          <TextInput
+            style={styles.searchInput}
+            placeholderTextColor={darkMode ? colors.white : colors.black}
+            placeholder="search for currency"
+            value={searchValue}
+            onChangeText={text => searchFilter(text)}
+          />
+        </View>
+        {filteredData === null ? (
           <ActivityIndicator
             size={'large'}
             color={darkMode ? colors.white : colors.black}
           />
         ) : (
           <FlatList
-            data={currencyList}
+            data={filteredData}
             keyExtractor={item => item.currency_code}
             renderItem={({item}) => (
               <CurrencyItem

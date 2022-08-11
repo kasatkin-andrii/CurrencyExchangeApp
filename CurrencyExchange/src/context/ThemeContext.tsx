@@ -14,7 +14,7 @@ export const ThemeContext = createContext({} as ThemeContextProps)
 export const ThemeContextProvider = ({children}: ThemeContextProviderProps) => {
   const [darkMode, setDarkMode] = useState(true)
 
-  const toggleDarkMode = () => setDarkMode(!darkMode)
+  const toggleDarkMode = () => setDarkMode(prev => !prev)
 
   return (
     <ThemeContext.Provider value={{darkMode, toggleDarkMode}}>
